@@ -1,6 +1,4 @@
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -23,9 +21,17 @@ public class ThreadedServer {
                 System.out.println("IN ATTESA DI CLIENT...");
                 socket = serverSocket.accept();
                 System.out.println("Client connesso (" + socket + "), apertura sessione....");
-                new ServerRSA(socket, 1).start(); //Inizia thread
+                if(cont >= 0){
+                    //cont--;
+                }
             }catch (IOException e){
                 System.out.println("I/O error: " + e);
+            }
+            if(cont >= 0){
+                new ServerRSA(socket, 1).start(); //Inizia thread
+            }
+            else{
+                new ServerRSA(socket, 0).start(); //Inizia thread
             }
             
         }

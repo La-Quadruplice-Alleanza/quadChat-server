@@ -7,17 +7,20 @@ import java.util.ArrayList;
 public class ServerRSA extends Thread{
 	ServerSocket server = null;
 	Socket client = null;
-	String stringaRicevuta;
-	String stringaModificata;
 	BufferedReader inDalClient;
 	DataOutputStream outVersoClient;
-	int lunghezza = 0;
+
+	String stringaRicevuta;
 	BigInteger publicKey[] = new BigInteger[2];
 	BigInteger msg;
 	BigInteger privateKey[], publicKey_server[], Keys[];
-	String username;
+	String username = "";
+
+	int flag;
+	
 	public static ArrayList<ServerRSA> listaClient = new ArrayList<>();
 	RSA_Cripta crypt = new RSA_Cripta();
+
 	public ServerRSA(Socket client, int valid){
 		this.client = client;
 		try{
@@ -39,7 +42,6 @@ public class ServerRSA extends Thread{
 		try{
 			
 			RSA_GenKey keyGenerator = new RSA_GenKey();
-			RSA_Decripta decrypt = new RSA_Decripta();
 			
 			System.out.println("Connessione al client riuscita, generazione chiavi...");
 			
@@ -54,16 +56,12 @@ public class ServerRSA extends Thread{
 			privateKey[0] = Keys[2];
 			privateKey[1] = Keys[1];
 			System.out.println("Chiavi generate, invio chiave pubblica al client...");
-			//System.out.println(publicKey_server[0]);
-			//System.out.println(publicKey_server[1]);
-
-			//outVersoClient.writeBytes(publicKey_server[0].toString() + "\n");
-			//outVersoClient.writeBytes(publicKey_server[1].toString() + "\n");
-			int flag;
+			
 			stringaRicevuta = inDalClient.readLine();
 			publicKey[0] = new BigInteger(stringaRicevuta);
 			stringaRicevuta = inDalClient.readLine();
 			publicKey[1] = new BigInteger(stringaRicevuta);
+			//INIZIO VALIDITY HANDSHAKE
 			do{
 				flag = 0;
 				username = inDalClient.readLine();
@@ -76,25 +74,27 @@ public class ServerRSA extends Thread{
 					}
 				}
 			}while(flag == 1);
+			if(username == null){
+				username = "UNDEFINED_USER";
+				throw new Exception();
+			}
 			outVersoClient.writeBytes("0" + '\n');
+			//FINE VALIDITY HANDSHAKE
 			System.out.println("Chiavi inviate e ricevute, in attesa del messaggio da decriptare...");
 			annunciaClient();
 
-			do{
+			while(true){
 				System.out.println("In attesa di un messaggio...");
 				inDalClient.readLine();
+
 				System.out.println("Richiesta di invio messaggio ricevuta, inizio routine...");
 				outVersoClient.writeBytes("STPMSG" + '\n');
 				sendMsg();
-				//msg = decrypt.decrypt_bi(privateKey[0], privateKey[1], msg);
-				//stringaModificata = decrypt.decrypt(publicKey[0], publicKey[1], msg);
-				
-				//System.out.println("Messaggio decriptato! Invio al client..." + stringaModificata);
-				//stringaModificata = Base64.getEncoder().encodeToString(stringaModificata.getBytes());
+
 				outVersoClient.flush();
 				System.out.println("Messaggio inviato con successo!");
-			}while(lunghezza != -999);
-			client.close();
+			}
+			//client.close();
 		}
 		catch(Exception e) {
 			System.out.println(e.getMessage());
@@ -114,16 +114,17 @@ public class ServerRSA extends Thread{
 		outVersoClient.writeBytes(Integer.toString(listaClient.size()) + '\n');
 		for(ServerRSA client : listaClient){
 			if(!(client.username.equals(username))){
-				outVersoClient.writeBytes(client.publicKey[0].toString() + '\n');
+				outVersoClient.writeBytes(client.publicKey[0].toString() + '\n'); //Invio chiavi pubbliche al Client
 				outVersoClient.writeBytes(client.publicKey[1].toString() + '\n');
-				msg = new BigInteger(inDalClient.readLine());
+
+				msg = new BigInteger(inDalClient.readLine()); //Ricezione messaggio e chiave pubblica
 				publicKeyServer[0] = new BigInteger(inDalClient.readLine());
 				publicKeyServer[1] = new BigInteger(inDalClient.readLine());
-				client.outVersoClient.writeBytes(msg.toString() + '\n');
+
+				client.outVersoClient.writeBytes(msg.toString() + '\n'); //Invio di messaggio/username/chiave pubblica
 				client.outVersoClient.writeBytes(username + '\n');
 				client.outVersoClient.writeBytes(publicKeyServer[0].toString() + '\n');
 				client.outVersoClient.writeBytes(publicKeyServer[1].toString() + '\n');
-				//System.out.println(username);
 			}
 		}
 	}
@@ -140,9 +141,11 @@ public class ServerRSA extends Thread{
 	public void rimuoviClient() throws Exception{
 		String annuncio;
 		BigInteger encr;
-		annuncio = "L'utente " + username + " si è disconnesso!";
-		encr = crypt.crypt(privateKey[0], privateKey[1], annuncio);
-		sendComm(encr, publicKey_server);
+		if(username.equals("UNDEFINED_USER") == false){
+			annuncio = "L'utente " + username + " si è disconnesso!";
+			encr = crypt.crypt(privateKey[0], privateKey[1], annuncio);
+			sendComm(encr, publicKey_server);
+		}
 		listaClient.remove(this);
 	}
 	public void annunciaClient() throws Exception{
