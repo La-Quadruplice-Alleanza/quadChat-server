@@ -1,4 +1,4 @@
-﻿//SERVER
+//SERVER
 import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
@@ -65,6 +65,7 @@ public class ServerRSA extends Thread{
 			do{
 				flag = 0;
 				username = inDalClient.readLine();
+				//TODO: #2 Criptare anche gli username @Azel04 @Zuppa-hub @Reddddddddddddddd @leomob24
 				for(ServerRSA client : listaClient){
 					if(client != this && client.username.equals(username)){
 						flag = 1;
