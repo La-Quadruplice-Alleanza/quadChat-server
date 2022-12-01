@@ -1,4 +1,4 @@
-//SERVER
+﻿//SERVER
 import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
@@ -55,19 +55,19 @@ public class ServerRSA extends Thread{
 
 			privateKey[0] = Keys[2];
 			privateKey[1] = Keys[1];
-			System.out.println("Chiavi generate, invio chiave pubblica al client...");
+			System.out.println("Chiavi generate, ricezione chiavi pubbliche...");
 			
 			stringaRicevuta = inDalClient.readLine();
 			publicKey[0] = new BigInteger(stringaRicevuta);
 			stringaRicevuta = inDalClient.readLine();
 			publicKey[1] = new BigInteger(stringaRicevuta);
+			System.out.println("Chiavi pubbliche ricevute, inizio scambio username e validity handshake...");
 			//INIZIO VALIDITY HANDSHAKE
 			do{
 				flag = 0;
 				username = inDalClient.readLine();
-				//TODO: #2 Criptare anche gli username @Azel04 @Zuppa-hub @Reddddddddddddddd @leomob24
 				for(ServerRSA client : listaClient){
-					if(client != this && client.username.equals(username)){
+					if((client != this && client.username.equals(username)) || username.length() == 0){
 						flag = 1;
 						outVersoClient.writeBytes("1" + '\n');
 						username = "";
@@ -81,7 +81,7 @@ public class ServerRSA extends Thread{
 			}
 			outVersoClient.writeBytes("0" + '\n');
 			//FINE VALIDITY HANDSHAKE
-			System.out.println("Chiavi inviate e ricevute, in attesa del messaggio da decriptare...");
+			System.out.println("L'utente " + username + " avente l'indirizzo ip " + client.getInetAddress() + " connesso con successo! In attesa di un messaggio...");
 			annunciaClient();
 
 			while(true){
