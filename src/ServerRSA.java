@@ -3,6 +3,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class ServerRSA extends Thread{
 	ServerSocket server = null;
@@ -66,6 +67,7 @@ public class ServerRSA extends Thread{
 			do{
 				flag = 0;
 				username = inDalClient.readLine();
+				username = new String(Base64.getDecoder().decode(username));
 				for(ServerRSA client : listaClient){
 					if((client != this && client.username.equals(username)) || username.length() == 0){
 						flag = 1;
@@ -123,17 +125,18 @@ public class ServerRSA extends Thread{
 				publicKeyServer[1] = new BigInteger(inDalClient.readLine());
 
 				client.outVersoClient.writeBytes(msg.toString() + '\n'); //Invio di messaggio/username/chiave pubblica
-				client.outVersoClient.writeBytes(username + '\n');
+				client.outVersoClient.writeBytes(Base64.getEncoder().encodeToString(username.getBytes()) + '\n');
 				client.outVersoClient.writeBytes(publicKeyServer[0].toString() + '\n');
 				client.outVersoClient.writeBytes(publicKeyServer[1].toString() + '\n');
 			}
 		}
 	}
 	public void sendComm(BigInteger msg, BigInteger publicKey[]) throws Exception{
+		String usernameServer = "SERVER";
 		for(ServerRSA client : listaClient){
 			if(!(client.username.equals(username))){
 				client.outVersoClient.writeBytes(msg.toString() + '\n');
-				client.outVersoClient.writeBytes("SERVER" + '\n');
+				client.outVersoClient.writeBytes(Base64.getEncoder().encodeToString(usernameServer.getBytes()) + '\n');
 				client.outVersoClient.writeBytes(publicKey[0].toString() + '\n');
 				client.outVersoClient.writeBytes(publicKey[1].toString() + '\n');
 			}
