@@ -14,11 +14,9 @@ public class ServerRSA extends Thread{
 	String stringaRicevuta;
 	BigInteger publicKey[] = new BigInteger[2];
 	BigInteger msg;
-
-	private BigInteger privateKey[], Keys[];
-	BigInteger publicKey_server[];
+	BigInteger privateKey[], publicKey_server[], Keys[];
 	String username = "";
-	String nomeBandito = "SERVER";
+
 	int flag;
 	
 	public static ArrayList<ServerRSA> listaClient = new ArrayList<>();
@@ -34,6 +32,7 @@ public class ServerRSA extends Thread{
 				return;
 			}
 			
+			listaClient.add(this);
 			//comunica();
 		}catch(Exception e){
 
@@ -69,18 +68,12 @@ public class ServerRSA extends Thread{
 				flag = 0;
 				username = inDalClient.readLine();
 				username = new String(Base64.getDecoder().decode(username));
-				if(username.length() == 0 || username.length() > 20 || username.equals(nomeBandito)){
-					flag = 1;
-					outVersoClient.writeBytes("1" + '\n');
-					username = "";
-				}else{
-					for(ServerRSA client : listaClient){
-						if((client != this && client.username.equals(username))){
-							flag = 1;
-							outVersoClient.writeBytes("1" + '\n');
-							username = "";
-							break;
-						}
+				for(ServerRSA client : listaClient){
+					if((client != this && client.username.equals(username)) || username.length() == 0){
+						flag = 1;
+						outVersoClient.writeBytes("1" + '\n');
+						username = "";
+						break;
 					}
 				}
 			}while(flag == 1);
@@ -91,7 +84,6 @@ public class ServerRSA extends Thread{
 			outVersoClient.writeBytes("0" + '\n');
 			//FINE VALIDITY HANDSHAKE
 			System.out.println("L'utente " + username + " avente l'indirizzo ip " + client.getInetAddress() + " connesso con successo! In attesa di un messaggio...");
-			listaClient.add(this);
 			annunciaClient();
 
 			while(true){
@@ -112,7 +104,7 @@ public class ServerRSA extends Thread{
 			try{
 				rimuoviClient();
 			}catch(Exception ex){
-				
+
 			}
 			System.out.println("Il client è crashato o è stato chiuso forzatamente");
 			return;
@@ -121,21 +113,18 @@ public class ServerRSA extends Thread{
 	}
 	public void sendMsg() throws Exception{
 		BigInteger msg;
-		BigInteger publicKeyServer[] = new BigInteger[2];
 		outVersoClient.writeBytes(Integer.toString(listaClient.size()) + '\n');
 		for(ServerRSA client : listaClient){
 			if(!(client.username.equals(username))){
-				outVersoClient.writeBytes(client.publicKey[0].toString() + '\n'); //Invio cshiavi pubbliche al Client
+				outVersoClient.writeBytes(client.publicKey[0].toString() + '\n'); //Invio chiavi pubbliche al Client
 				outVersoClient.writeBytes(client.publicKey[1].toString() + '\n');
 
 				msg = new BigInteger(inDalClient.readLine()); //Ricezione messaggio e chiave pubblica
-				publicKeyServer[0] = new BigInteger(inDalClient.readLine());
-				publicKeyServer[1] = new BigInteger(inDalClient.readLine());
 
 				client.outVersoClient.writeBytes(msg.toString() + '\n'); //Invio di messaggio/username/chiave pubblica
 				client.outVersoClient.writeBytes(Base64.getEncoder().encodeToString(username.getBytes()) + '\n');
-				client.outVersoClient.writeBytes(publicKeyServer[0].toString() + '\n');
-				client.outVersoClient.writeBytes(publicKeyServer[1].toString() + '\n');
+				client.outVersoClient.writeBytes(publicKey[0].toString() + '\n');
+				client.outVersoClient.writeBytes(publicKey[1].toString() + '\n');
 			}
 		}
 	}
