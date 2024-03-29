@@ -5,7 +5,7 @@ Io e altri 3 miei compagni abbiamo iniziato questo progetto a Ottobre del 2022 e
 QuadChat è la dimostrazione di quello che abbiamo imparato in 3 anni, è la dimostrazione del nostro impegno.
 
 Sicuramente potevamo migliorare questo programma ancora, ma sinceramente non serve più.
-QuadChat ha dimostrato al nostro professore e alla commissione di esame il nostro impegno, questo era l'obiettivo che io, Celeste Rossetti, mi ero imposto.
+QuadChat ha dimostrato al nostro professore e alla commissione di esame il nostro impegno, questo era l'obiettivo che io, Yuna Rossetti, mi ero imposta.
 
 L'obiettivo è stato raggiunto con successo, e abbiamo tutti completato questa scuola con il massimo dei voti.
 
@@ -13,7 +13,7 @@ Vorrei ringraziare di cuore Cazzato Andrea, Mobbili Leonardo e Rossi Francesco, 
 Senza di voi non ce l'avrei fatta.
 
 Grazie.
-- Celeste Rossetti
+- Yuna Rossetti
 
 P.S.
 Se vi state domandando il perchè mi sto chiamando col nome Celeste, guardate il profilo di GitHub o chiedetemi direttamente.
